@@ -1,0 +1,24 @@
+# Entorno Virtual
+# Ignora la carpeta del entorno virtual
+venv/
+.venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos de dependencias
+*.egg-info/
+build/
+dist/
+
+# Archivos de entorno (¡MUY IMPORTANTE!)
+# Contienen contraseñas, llaves de API, etc.
+.env
+*.env
