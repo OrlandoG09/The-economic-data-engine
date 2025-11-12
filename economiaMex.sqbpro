@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="D:/PROYECTOS AMBICIOSOS/El motor de los datos económicos/economiaMex.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="0"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="3517"/><column_width id="4" width="0"/><expanded_item id="4" parent="0"/><expanded_item id="1" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="desempleo" custom_title="0" dock_id="2" table="4,9:maindesempleo"/><table title="confianza_consumidor" custom_title="0" dock_id="1" table="4,20:mainconfianza_consumidor"/><table title="tabla_macro_final" custom_title="0" dock_id="3" table="4,17:maintabla_macro_final"/><dock_state state="000000ff00000000fd0000000100000002000005bb0000038ffc0100000001fc00000000000005bb0000012f00fffffffa000000020100000003fb000000160064006f0063006b00420072006f00770073006500310100000000ffffffff0000012f00fffffffb000000160064006f0063006b00420072006f00770073006500320100000000ffffffff0000012900fffffffb000000160064006f0063006b00420072006f00770073006500330100000000ffffffff0000012f00ffffff000002690000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="confianza_consumidor" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="215"/><column index="2" value="127"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="desempleo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="215"/><column index="2" value="119"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tabla_macro_final" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="87"/><column index="2" value="47"/><column index="3" value="119"/><column index="4" value="127"/><column index="5" value="80"/><column index="6" value="87"/><column index="7" value="139"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">CREATE VIEW IF NOT EXISTS v_tasa_mensual AS
+SELECT
+    -- Crea el punto de anclaje (YYYY-MM-01)
+    strftime('%Y-%m-01', t1.fecha) AS fecha_limpia,
+    t1.dato AS tasa_objetivo
+FROM tasa_objetivo t1
+WHERE t1.fecha = (
+    -- Subconsulta: Encuentra la fecha más grande (MAX) para ese Año y Mes
+    -- Esto simula el &quot;LAST_VALUE&quot; o el valor vigente a fin de mes.
+    SELECT MAX(t2.fecha)
+    FROM tasa_objetivo t2
+    WHERE strftime('%Y-%m', t2.fecha) = strftime('%Y-%m', t1.fecha)
+);</sql><sql name="SQL 2">CREATE VIEW IF NOT EXISTS v_tc_mensual AS
+SELECT
+    -- Crea el punto de anclaje (YYYY-MM-01)
+    strftime('%Y-%m-01', fecha) AS fecha_limpia,
+    AVG(dato) AS tipo_cambio_promedio
+FROM tipo_de_cambio
+GROUP BY fecha_limpia;</sql><sql name="SQL 3">CREATE VIEW IF NOT EXISTS v_mensuales_limpias AS
+SELECT
+    -- Usamos la Inflación como la serie 'base'
+    strftime('%Y-%m-01', inf.fecha) AS fecha_limpia,
+    inf.dato AS inpc,
+    des.dato AS desempleo,
+    conf.dato AS confianza,
+    pib.dato AS pib_mensual
+
+FROM inflacion inf
+/* Unimos Desempleo, Confianza y PIB usando el YYYY-MM para hacer match */
+INNER JOIN desempleo des ON strftime('%Y-%m', inf.fecha) = strftime('%Y-%m', des.fecha)
+INNER JOIN confianza_consumidor conf ON strftime('%Y-%m', inf.fecha) = strftime('%Y-%m', conf.fecha)
+INNER JOIN pib ON strftime('%Y-%m', inf.fecha) = strftime('%Y-%m', pib.fecha);</sql><sql name="SQL 4">
+CREATE TABLE IF NOT EXISTS tabla_macro_final AS
+SELECT
+    v_tasa.fecha_limpia AS fecha,
+    
+    -- Variables de Salud Económica
+    v_mens.inpc,
+    v_mens.desempleo,
+    v_mens.confianza,
+    v_mens.pib_mensual,
+    
+    -- Variables de Política y Mercado
+    v_tasa.tasa_objetivo,
+    v_tc.tipo_cambio_promedio
+    
+FROM v_tasa_mensual v_tasa
+/* Unimos el Tipo de Cambio */
+INNER JOIN v_tc_mensual v_tc
+    ON v_tasa.fecha_limpia = v_tc.fecha_limpia
+/* Unimos TODAS las series mensuales limpias */
+INNER JOIN v_mensuales_limpias v_mens
+    ON v_tasa.fecha_limpia = v_mens.fecha_limpia
+
+ORDER BY 1;</sql><current_tab id="3"/></tab_sql></sqlb_project>
