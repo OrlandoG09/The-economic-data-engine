@@ -74,11 +74,10 @@ print("Tablas 'crudas' creadas/verificadas con éxito.\n")
 fecha_inicio = "2008-01-01"
 fecha_fin = "2025-12-31"
 
-#BANXICO (DIARIOS)
+#BANXICO
 API_TOKEN_BX = os.environ.get("API_TOKENBX")
 
 #Tasa Objetivo
-print("--- Jalando Tasa Objetivo (Banxico)...")
 ID_tasa_objetivo = "SF61745"
 df_tasa_objetivo = banco_mexico(API_TOKEN_BX, ID_tasa_objetivo, fecha_inicio, fecha_fin)
 
@@ -91,7 +90,6 @@ if df_tasa_objetivo is not None:
 
 
 #Tipo de Cambio
-print("--- Jalando Tipo de Cambio (Banxico)...")
 ID_tipo_cambio = "SF43718"
 df_tipo_cambio = banco_mexico(API_TOKEN_BX, ID_tipo_cambio, fecha_inicio, fecha_fin)
 
@@ -103,11 +101,10 @@ if df_tipo_cambio is not None:
         print(f"Ocurrió un error al insertar Tipo de Cambio: {e}\n")
 
 
-# --- INEGI (MENSUALES Y TRIMESTRALES) ---
+#INEGI
 API_TOKEN_IN = os.environ.get("API_TOKENIN")
 
 #Inflación
-print("--- Jalando Inflación (INEGI)...")
 ID_inflacion = "628217"
 df_inflacion = inegi_pro(API_TOKEN_IN, ID_inflacion)
 
@@ -120,7 +117,7 @@ if df_inflacion is not None:
 
 
 #Desempleo
-print("--- Jalando Desempleo (INEGI)...")
+
 ID_desempleo = "444666"
 df_desempleo = inegi_pro(API_TOKEN_IN, ID_desempleo)
 
@@ -133,7 +130,7 @@ if df_desempleo is not None:
 
 
 #Confianza del Consumidor
-print("--- Jalando Confianza del Consumidor (INEGI)...")
+
 ID_confianzacons = "454168"
 df_confianzacons = inegi_pro(API_TOKEN_IN, ID_confianzacons)
 
@@ -146,7 +143,7 @@ if df_confianzacons is not None:
 
 
 #PIB
-print("--- Jalando PIB (INEGI)...")
+
 ID_pib = "910399"
 df_pib = inegi_pro(API_TOKEN_IN, ID_pib)
 
@@ -158,6 +155,8 @@ if df_pib is not None:
         print(f"Ocurrió un error al insertar PIB: {e}\n")
 
 
-# --- 4. CERRAR CONEXIÓN ---
+#CERRAR CONEXIÓN
 conectar.close()
-print("--- SCRIPT DE ETL TERMINADO. Conexión cerrada. ---")
+print("Conexión cerrada")
+
+
